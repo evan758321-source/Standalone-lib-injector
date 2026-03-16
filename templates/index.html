@@ -307,7 +307,11 @@ async function startBuild() {
   let jobId;
   try {
     const res = await fetch('/inject', {method:'POST',body:fd});
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch(_) {
+      throw new Error('Server returned non-JSON (HTTP ' + res.status + '). Check that the backend is running.\n' + text.slice(0,200));
+    }
     if (data.error) throw new Error(data.error);
     jobId = data.job_id;
   } catch(err) {
