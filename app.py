@@ -1,6 +1,7 @@
 import os
 import re
 import uuid
+import time
 import shutil
 import subprocess
 import threading
@@ -107,10 +108,11 @@ def run_job(jid, apk_path, so_files):
         r = subprocess.run(
             ['java', '-jar', str(UBER_SIGNER_JAR),
              '--apks', str(output_unsigned),
-             '--out', str(job_dir)],
+             '--out', str(job_dir),
+             '--allowResign'],
             capture_output=True, text=True, timeout=120
         )
-        signed = [f for f in job_dir.glob('*.apk') if f != output_unsigned]
+        signed = [f for f in job_dir.glob('*.apk') if f.name != 'output_unsigned.apk']
         if signed:
             job['output_path'] = str(signed[0])
             job['output_name'] = 'patched_signed.apk'
@@ -120,7 +122,6 @@ def run_job(jid, apk_path, so_files):
             job['output_name'] = 'patched_unsigned.apk'
             job_log(jid, '⚠ Signing skipped — sign manually with apksigner.', 'info')
 
-        job_log(jid, '', '')
         job_log(jid, '✔ Done! APK ready to download.', 'ok')
         job['status'] = 'done'
 
@@ -128,10 +129,9 @@ def run_job(jid, apk_path, so_files):
         job_log(jid, '✗ Process timed out.', 'err')
         job['status'] = 'failed'
     except Exception as e:
-        job_log(jid, f'✗ Error: {e}', 'err')
+        job_log(jid, f'✗ Unexpected error: {e}', 'err')
         job['status'] = 'failed'
     finally:
-        # Clean up source files, keep output
         try:
             apk_path.unlink(missing_ok=True)
             for _, p in so_files:
@@ -167,12 +167,13 @@ def inject():
 
     so_files = []
     for f in libs:
-        fname = secure_filename(f.filename)
-        if not fname.lower().endswith('.so'):
+        # sanitize filename manually — no werkzeug needed
+        safe = re.sub(r'[^\w.\-]', '_', f.filename)
+        if not safe.lower().endswith('.so'):
             continue
-        p = job_dir / fname
+        p = job_dir / safe
         f.save(str(p))
-        name = re.sub(r'\.so$', '', fname, flags=re.IGNORECASE)
+        name = re.sub(r'\.so$', '', safe, flags=re.IGNORECASE)
         name = re.sub(r'^lib', '', name, flags=re.IGNORECASE)
         so_files.append((name, p))
 
