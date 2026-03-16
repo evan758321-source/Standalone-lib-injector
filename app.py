@@ -4,19 +4,19 @@ import uuid
 import shutil
 import subprocess
 import threading
-import time
+import tempfile
 from pathlib import Path
 from flask import Flask, request, jsonify, send_file, render_template
-from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB
 
-WORK_DIR = Path('/tmp/apk_jobs')
+BASE_DIR = Path(__file__).parent
+WORK_DIR = Path(tempfile.gettempdir()) / 'apk_jobs'
 WORK_DIR.mkdir(exist_ok=True)
 
-APKTOOL_JAR    = Path('/opt/apktool/apktool.jar')
-UBER_SIGNER_JAR = Path('/opt/uber-apk-signer/uber-apk-signer.jar')
+APKTOOL_JAR     = BASE_DIR / 'tools' / 'apktool.jar'
+UBER_SIGNER_JAR = BASE_DIR / 'tools' / 'signer.jar'
 
 # ─── Job store ────────────────────────────────────────────────────────────────
 jobs = {}
