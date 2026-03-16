@@ -19,7 +19,6 @@ WORK_DIR.mkdir(exist_ok=True)
 APKTOOL_JAR     = BASE_DIR / 'tools' / 'apktool.jar'
 UBER_SIGNER_JAR = BASE_DIR / 'tools' / 'signer.jar'
 
-# ─── Job store ────────────────────────────────────────────────────────────────
 jobs = {}
 
 def job_log(jid, msg, level='info'):
@@ -31,6 +30,7 @@ def run_job(jid, apk_path, so_files):
     job_dir = WORK_DIR / jid
     decompiled      = job_dir / 'decompiled'
     output_unsigned = job_dir / 'output_unsigned.apk'
+    output_final    = job_dir / 'patched_signed.apk'
 
     try:
         # 1. Decompile
@@ -55,10 +55,9 @@ def run_job(jid, apk_path, so_files):
             job['status'] = 'failed'; return
         job_log(jid, f'  Found: {smali_file.relative_to(decompiled)} ✔', 'ok')
 
-        # 3. Patch smali — insert loadLibrary calls after .locals in onCreate
+        # 3. Patch smali
         job_log(jid, '► Patching onCreate...', 'info')
         text = smali_file.read_text(encoding='utf-8')
-
         pattern = re.compile(
             r'(\.method (?:protected|public) onCreate\(Landroid/os/Bundle;\)V'
             r'.*?)(\.locals\s+\d+)',
@@ -103,24 +102,42 @@ def run_job(jid, apk_path, so_files):
             job['status'] = 'failed'; return
         job_log(jid, '  Recompiled ✔', 'ok')
 
+        # Clean up decompiled folder now — no longer needed, frees space
+        shutil.rmtree(decompiled, ignore_errors=True)
+
         # 6. Sign
         job_log(jid, '► Signing APK (debug key)...', 'info')
+        sign_out = job_dir / 'signed_out'
+        sign_out.mkdir(exist_ok=True)
         r = subprocess.run(
             ['java', '-jar', str(UBER_SIGNER_JAR),
              '--apks', str(output_unsigned),
-             '--out', str(job_dir),
+             '--out', str(sign_out),
              '--allowResign'],
             capture_output=True, text=True, timeout=120
         )
-        signed = [f for f in job_dir.glob('*.apk') if f.name != 'output_unsigned.apk']
-        if signed:
-            job['output_path'] = str(signed[0])
+
+        # uber-apk-signer outputs something like output_unsigned-aligned-debugSigned.apk
+        signed_candidates = list(sign_out.glob('*.apk'))
+        if signed_candidates:
+            shutil.copy2(str(signed_candidates[0]), str(output_final))
+            shutil.rmtree(sign_out, ignore_errors=True)
+            output_unsigned.unlink(missing_ok=True)
+            job['output_path'] = str(output_final)
             job['output_name'] = 'patched_signed.apk'
             job_log(jid, '  Signed ✔', 'ok')
         else:
+            # Signing failed — deliver unsigned anyway
             job['output_path'] = str(output_unsigned)
             job['output_name'] = 'patched_unsigned.apk'
-            job_log(jid, '⚠ Signing skipped — sign manually with apksigner.', 'info')
+            job_log(jid, '⚠ Signing failed — delivering unsigned APK', 'info')
+            job_log(jid, '  ' + (r.stderr or r.stdout)[:300], 'info')
+
+        # Verify the output file actually exists before marking done
+        out_path = Path(job['output_path'])
+        if not out_path.exists():
+            job_log(jid, f'✗ Output file missing: {out_path}', 'err')
+            job['status'] = 'failed'; return
 
         job_log(jid, '✔ Done! APK ready to download.', 'ok')
         job['status'] = 'done'
@@ -129,14 +146,16 @@ def run_job(jid, apk_path, so_files):
         job_log(jid, '✗ Process timed out.', 'err')
         job['status'] = 'failed'
     except Exception as e:
+        import traceback
         job_log(jid, f'✗ Unexpected error: {e}', 'err')
+        job_log(jid, traceback.format_exc()[-500:], 'err')
         job['status'] = 'failed'
     finally:
+        # Only clean up source files, NOT the output
         try:
             apk_path.unlink(missing_ok=True)
             for _, p in so_files:
                 p.unlink(missing_ok=True)
-            shutil.rmtree(decompiled, ignore_errors=True)
         except Exception:
             pass
 
@@ -167,7 +186,6 @@ def inject():
 
     so_files = []
     for f in libs:
-        # sanitize filename manually — no werkzeug needed
         safe = re.sub(r'[^\w.\-]', '_', f.filename)
         if not safe.lower().endswith('.so'):
             continue
@@ -196,13 +214,30 @@ def status(jid):
 @app.route('/download/<jid>')
 def download(jid):
     if jid not in jobs:
-        return jsonify({'error': 'Unknown job'}), 404
+        return jsonify({'error': 'Job not found — server may have restarted'}), 404
     j = jobs[jid]
-    if j['status'] != 'done' or not j['output_path']:
-        return jsonify({'error': 'Not ready'}), 400
-    return send_file(j['output_path'], as_attachment=True,
-                     download_name=j['output_name'],
-                     mimetype='application/vnd.android.package-archive')
+    if j['status'] != 'done':
+        return jsonify({'error': 'Job not done yet'}), 400
+    if not j['output_path']:
+        return jsonify({'error': 'No output file — build may have failed'}), 500
+
+    out_path = Path(j['output_path'])
+    if not out_path.exists():
+        return jsonify({'error': f'Output file missing from disk: {out_path.name}'}), 500
+
+    # Schedule full cleanup 15s after download
+    def _delete_after():
+        time.sleep(15)
+        shutil.rmtree(str(WORK_DIR / jid), ignore_errors=True)
+        jobs.pop(jid, None)
+    threading.Thread(target=_delete_after, daemon=True).start()
+
+    return send_file(
+        str(out_path),
+        as_attachment=True,
+        download_name=j['output_name'],
+        mimetype='application/vnd.android.package-archive'
+    )
 
 
 # ─── Periodic cleanup ─────────────────────────────────────────────────────────
