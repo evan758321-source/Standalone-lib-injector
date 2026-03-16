@@ -5,21 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>APK SO Injector</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap');
 
   :root {
-    --bg: #0a0c0f;
-    --surface: #111418;
-    --surface2: #181d24;
-    --border: #1e2530;
-    --accent: #00e5ff;
-    --accent2: #ff3d71;
-    --accent3: #a259ff;
-    --text: #cdd6e0;
-    --text-dim: #5a6780;
-    --green: #00ff88;
-    --mono: 'Share Tech Mono', monospace;
-    --body: 'Exo 2', sans-serif;
+    --bg: #0f0f0f;
+    --panel: #161616;
+    --raised: #1c1c1c;
+    --line: #2a2a2a;
+    --line2: #333;
+    --text: #e8e8e8;
+    --sub: #888;
+    --muted: #444;
+    --green: #b8f5a0;
+    --green-bg: #0e1f0a;
+    --red: #f5a0a0;
+    --amber: #f5d080;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,277 +29,200 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: var(--body);
+    font-family: var(--sans);
     min-height: 100vh;
-    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
   }
 
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .container {
-    position: relative;
-    z-index: 1;
-    max-width: 780px;
+  .wrap {
+    max-width: 640px;
     margin: 0 auto;
-    padding: 40px 20px 80px;
+    padding: 48px 24px 100px;
   }
 
-  .header { text-align: center; margin-bottom: 48px; }
+  header { margin-bottom: 40px; }
 
-  .header-badge {
-    display: inline-block;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--accent);
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    padding: 4px 14px;
-    border: 1px solid rgba(0,229,255,0.3);
-    border-radius: 2px;
-    margin-bottom: 18px;
-    background: rgba(0,229,255,0.05);
-  }
-
-  h1 { font-size: clamp(28px, 5vw, 42px); font-weight: 700; letter-spacing: -0.5px; color: #fff; }
-  h1 span { color: var(--accent); }
-
-  .header-sub { margin-top: 10px; color: var(--text-dim); font-size: 14px; font-weight: 300; }
-
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 28px;
-    margin-bottom: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(0,229,255,0.4), transparent);
-  }
-
-  .card-title {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 3px;
-    color: var(--accent);
-    text-transform: uppercase;
-    margin-bottom: 18px;
+  .title-row {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 14px;
+    margin-bottom: 6px;
   }
 
-  .card-title .num {
-    background: rgba(0,229,255,0.12);
-    width: 22px; height: 22px;
-    border-radius: 4px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px; color: var(--accent);
-  }
-
-  .dropzone {
-    border: 1.5px dashed var(--border);
+  .logo {
+    width: 34px; height: 34px;
+    background: var(--raised);
+    border: 1px solid var(--line2);
     border-radius: 8px;
-    padding: 32px 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.25s;
-    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; flex-shrink: 0;
+  }
+
+  h1 {
+    font-size: 20px; font-weight: 600;
+    letter-spacing: -0.3px; color: var(--text);
+  }
+
+  .subtitle {
+    font-size: 13px; color: var(--sub);
+    margin-left: 48px; font-weight: 400; font-family: var(--mono);
+  }
+
+  .step { margin-bottom: 24px; }
+
+  .step-header {
+    display: flex; align-items: center;
+    gap: 10px; margin-bottom: 10px;
+  }
+
+  .step-num { font-family: var(--mono); font-size: 11px; color: var(--muted); width: 18px; flex-shrink: 0; }
+  .step-title { font-size: 13px; font-weight: 500; color: var(--sub); }
+
+  .drop {
     position: relative;
+    border: 1px solid var(--line2);
+    border-radius: 8px;
+    background: var(--panel);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
     overflow: hidden;
   }
 
-  .dropzone:hover, .dropzone.drag-over {
-    border-color: var(--accent);
-    background: rgba(0,229,255,0.04);
+  .drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+
+  .drop-inner { padding: 20px; display: flex; align-items: center; gap: 14px; }
+
+  .drop-icon {
+    width: 36px; height: 36px;
+    background: var(--raised); border: 1px solid var(--line2);
+    border-radius: 7px; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0; transition: border-color 0.2s;
   }
 
-  .dropzone.has-file { border-color: var(--green); border-style: solid; background: rgba(0,255,136,0.04); }
+  .drop-text .primary { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+  .drop-text .secondary { font-size: 12px; color: var(--sub); font-family: var(--mono); }
 
-  .dropzone input {
-    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
-  }
+  .drop:hover { background: var(--raised); }
+  .drop:hover .drop-icon { border-color: #444; }
+  .drop.drag-over { border-color: var(--green); background: var(--green-bg); }
+  .drop.has-file { border-color: #2a3a27; }
+  .drop.has-file .drop-icon { background: var(--green-bg); border-color: #2a3a27; }
+  .drop.has-file .drop-text .primary { color: var(--green); }
 
-  .dz-icon { font-size: 32px; margin-bottom: 10px; display: block; }
-  .dz-label { font-size: 14px; color: var(--text-dim); font-weight: 300; }
-  .dz-label strong { color: var(--text); font-weight: 600; }
-  .dz-filename { font-family: var(--mono); font-size: 13px; color: var(--green); margin-top: 6px; display: none; }
-
-  .dropzone.has-file .dz-filename { display: block; }
-  .dropzone.has-file .dz-label { display: none; }
-  .dropzone.has-file .dz-icon { display: none; }
-
-  .so-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+  .so-list { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
 
   .so-item {
-    display: grid;
-    grid-template-columns: 1fr 32px;
-    gap: 8px;
-    align-items: center;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 12px;
-    animation: slideIn 0.2s ease;
-    border-left: 3px solid var(--green);
+    display: flex; align-items: center;
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 7px; padding: 9px 12px; gap: 10px;
+    animation: fadeUp 0.15s ease;
   }
 
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(-6px); }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(4px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  .so-item-name { font-family: var(--mono); font-size: 13px; color: var(--green); }
-  .so-item-sub  { font-family: var(--mono); font-size: 11px; color: var(--accent3); margin-top: 2px; }
+  .so-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); opacity: 0.6; flex-shrink: 0; }
+  .so-name { font-family: var(--mono); font-size: 12px; color: var(--text); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .so-arch { font-family: var(--mono); font-size: 11px; color: var(--muted); flex-shrink: 0; }
+  .so-rm { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 2px 4px; border-radius: 4px; transition: color 0.15s, background 0.15s; display: flex; align-items: center; flex-shrink: 0; }
+  .so-rm:hover { color: var(--red); background: rgba(245,160,160,0.08); }
 
-  .remove-so {
-    background: none; border: none; cursor: pointer;
-    color: var(--text-dim); font-size: 18px; padding: 4px;
-    border-radius: 4px; transition: color 0.15s;
-    display: flex; align-items: center; justify-content: center;
+  .build-area { margin-top: 32px; }
+
+  .btn-row { display: flex; gap: 8px; }
+
+  .btn { border: none; border-radius: 8px; cursor: pointer; font-family: var(--sans); font-weight: 500; font-size: 14px; padding: 11px 22px; transition: opacity 0.15s, transform 0.1s; }
+  .btn:active { transform: scale(0.98); }
+
+  .btn-primary { background: var(--text); color: #0f0f0f; flex: 1; }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-primary:disabled { opacity: 0.25; cursor: not-allowed; transform: none; }
+
+  .btn-dl { background: var(--green-bg); color: var(--green); border: 1px solid #2a3a27; flex: 1; display: none; }
+  .btn-dl.show { display: block; }
+  .btn-dl:hover { opacity: 0.85; }
+
+  .pbar-track { height: 2px; background: var(--line); border-radius: 2px; margin-top: 14px; overflow: hidden; display: none; }
+  .pbar-track.show { display: block; }
+  .pbar-fill { height: 100%; width: 0%; background: var(--green); border-radius: 2px; transition: width 0.4s ease; }
+
+  .logbox {
+    margin-top: 12px; background: #0a0a0a; border: 1px solid var(--line);
+    border-radius: 8px; padding: 14px; font-family: var(--mono); font-size: 12px;
+    line-height: 1.7; max-height: 200px; overflow-y: auto; display: none;
+    scrollbar-width: thin; scrollbar-color: var(--line) transparent;
   }
-  .remove-so:hover { color: var(--accent2); }
+  .logbox.show { display: block; }
+  .logbox p { color: var(--sub); }
+  .logbox p.ok   { color: var(--green); }
+  .logbox p.err  { color: var(--red); }
+  .logbox p.info { color: var(--amber); }
 
-  .empty-so { text-align: center; color: var(--text-dim); font-size: 13px; padding: 16px; font-style: italic; }
-
-  .tag {
-    display: inline-block; background: rgba(162,89,255,0.15); color: var(--accent3);
-    font-family: var(--mono); font-size: 10px; padding: 2px 8px;
-    border-radius: 3px; margin-left: 6px; vertical-align: middle;
-  }
-
-  .help { font-size: 12px; color: var(--text-dim); margin-top: 8px; font-weight: 300; line-height: 1.6; }
-  .help code { color: var(--accent); }
-
-  /* Liquid buttons */
-  .btn {
-    position: relative; border: none; outline: none; cursor: pointer;
-    font-family: var(--body); font-weight: 600; font-size: 14px;
-    letter-spacing: 0.5px; border-radius: 8px; overflow: hidden;
-    transition: transform 0.15s, box-shadow 0.2s;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .btn:active { transform: scale(0.97); }
-
-  .btn-primary {
-    background: linear-gradient(135deg, var(--accent) 0%, var(--accent3) 100%);
-    color: #fff; padding: 16px 32px; font-size: 16px;
-    letter-spacing: 1px; width: 100%;
-    text-transform: uppercase;
-  }
-  .btn-primary:hover { box-shadow: 0 0 30px rgba(0,229,255,0.25), 0 0 60px rgba(162,89,255,0.15); }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-  .btn-dl {
-    background: linear-gradient(135deg, var(--green), #00c96b);
-    color: #000; padding: 14px 28px; font-size: 15px;
-    width: 100%; text-transform: uppercase; letter-spacing: 1px;
-  }
-
-  .ripple {
-    position: absolute; border-radius: 50%;
-    background: rgba(255,255,255,0.25);
-    transform: scale(0);
-    animation: ripple-anim 0.55s linear;
-    pointer-events: none;
-  }
-  @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
-
-  /* Progress + log */
-  .progress-wrap { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin: 14px 0 0; display: none; }
-  .progress-wrap.visible { display: block; }
-  .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent3)); border-radius: 2px; transition: width 0.4s ease; box-shadow: 0 0 8px var(--accent); }
-
-  .log-box {
-    background: #080b0e; border: 1px solid var(--border); border-radius: 8px;
-    padding: 16px; font-family: var(--mono); font-size: 12px; line-height: 1.7;
-    max-height: 220px; overflow-y: auto; display: none; margin-top: 14px;
-    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
-  }
-  .log-box.visible { display: block; }
-  .log-line       { color: var(--text-dim); }
-  .log-line.ok    { color: var(--green); }
-  .log-line.err   { color: var(--accent2); }
-  .log-line.info  { color: var(--accent); }
-
-  .dl-wrap { display: none; margin-top: 14px; }
-  .dl-wrap.visible { display: block; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 8px; font-family: var(--mono); padding-left: 28px; }
 </style>
 </head>
 <body>
-<div class="container">
+<div class="wrap">
+  <header>
+    <div class="title-row">
+      <div class="logo">⚙</div>
+      <h1>APK SO Injector</h1>
+    </div>
+    <p class="subtitle">apktool · smali patcher · zipalign · sign</p>
+  </header>
 
-  <div class="header">
-    <div class="header-badge">Unity · Smali Patcher</div>
-    <h1>APK <span>SO</span> Injector</h1>
-    <p class="header-sub">Real apktool decompile → patch → recompile → sign pipeline</p>
-  </div>
-
-  <!-- Step 1: APK -->
-  <div class="card">
-    <div class="card-title"><span class="num">1</span> Upload APK</div>
-    <div class="dropzone" id="apkZone">
+  <div class="step">
+    <div class="step-header">
+      <span class="step-num">01</span>
+      <span class="step-title">Upload APK</span>
+    </div>
+    <div class="drop" id="apkZone">
       <input type="file" id="apkInput" accept=".apk" />
-      <span class="dz-icon">📦</span>
-      <p class="dz-label"><strong>Click or drag</strong> your Unity APK here</p>
-      <p class="dz-filename" id="apkName"></p>
+      <div class="drop-inner">
+        <div class="drop-icon">📦</div>
+        <div class="drop-text">
+          <div class="primary" id="apkPrimary">Drop APK here or click to browse</div>
+          <div class="secondary" id="apkSecondary">Unity APK · .apk</div>
+        </div>
+      </div>
     </div>
-    <p class="help">Must be a Unity game APK — needs <code>UnityPlayerActivity.smali</code> inside.</p>
+    <div class="hint">requires UnityPlayerActivity.smali</div>
   </div>
 
-  <!-- Step 2: SO files -->
-  <div class="card">
-    <div class="card-title"><span class="num">2</span> Upload .so Libraries <span class="tag">arm64-v8a</span></div>
-    <div class="dropzone" id="soZone">
+  <div class="step">
+    <div class="step-header">
+      <span class="step-num">02</span>
+      <span class="step-title">Add .so Libraries</span>
+    </div>
+    <div class="drop" id="soZone">
       <input type="file" id="soInput" accept=".so" multiple />
-      <span class="dz-icon">🔧</span>
-      <p class="dz-label"><strong>Click or drag</strong> one or more <code style="color:var(--accent3)">.so</code> files</p>
+      <div class="drop-inner">
+        <div class="drop-icon">🔩</div>
+        <div class="drop-text">
+          <div class="primary">Drop .so files here or click to browse</div>
+          <div class="secondary">arm64-v8a · multiple allowed</div>
+        </div>
+      </div>
     </div>
-    <div class="so-list" id="soList" style="margin-top:14px;">
-      <div class="empty-so" id="emptyMsg">No libraries added yet.</div>
-    </div>
-    <p class="help">Name is read from filename automatically — <code>libmyhook.so</code> → injects <code>myhook</code> and copies to <code style="color:var(--accent3)">lib/arm64-v8a/</code>.</p>
+    <div class="so-list" id="soList"></div>
+    <div class="hint">libmyhook.so → loads myhook → copies to lib/arm64-v8a/</div>
   </div>
 
-  <!-- Step 3: Build -->
-  <div class="card">
-    <div class="card-title"><span class="num">3</span> Inject &amp; Build</div>
-    <button class="btn btn-primary" id="buildBtn" onclick="startBuild()">⚡ Inject &amp; Build APK</button>
-    <div class="progress-wrap" id="progressWrap">
-      <div class="progress-bar" id="progressBar"></div>
+  <div class="build-area">
+    <div class="btn-row">
+      <button class="btn btn-primary" id="buildBtn" onclick="startBuild()">Inject &amp; Build</button>
+      <button class="btn btn-dl" id="dlBtn">Download Patched APK</button>
     </div>
-    <div class="log-box" id="logBox"></div>
-    <div class="dl-wrap" id="dlWrap">
-      <button class="btn btn-dl" id="dlBtn">⬇ Download Patched APK</button>
-    </div>
+    <div class="pbar-track" id="pbarTrack"><div class="pbar-fill" id="pbarFill"></div></div>
+    <div class="logbox" id="logbox"></div>
   </div>
-
 </div>
 
 <script>
-// ─── State ────────────────────────────────────────────────────────────────────
-let apkFile = null;
-let soFiles = [];   // File objects
-let currentJob = null;
-let pollInterval = null;
+let apkFile = null, soFiles = [], pollInterval = null, logOffset = 0;
 
-// ─── APK drop zone ────────────────────────────────────────────────────────────
 const apkInput = document.getElementById('apkInput');
 const apkZone  = document.getElementById('apkZone');
 
@@ -313,173 +238,100 @@ apkZone.addEventListener('drop', e => {
 function setApk(f) {
   apkFile = f;
   apkZone.classList.add('has-file');
-  document.getElementById('apkName').textContent = '📦 ' + f.name;
+  document.getElementById('apkPrimary').textContent = f.name;
+  document.getElementById('apkSecondary').textContent = (f.size/1024/1024).toFixed(1) + ' MB';
 }
 
-// ─── SO drop zone ─────────────────────────────────────────────────────────────
 const soInput = document.getElementById('soInput');
 const soZone  = document.getElementById('soZone');
 
-soInput.addEventListener('change', e => { [...e.target.files].forEach(addSoFile); soInput.value=''; });
+soInput.addEventListener('change', e => { [...e.target.files].forEach(addSo); soInput.value=''; });
 soZone.addEventListener('dragover', e => { e.preventDefault(); soZone.classList.add('drag-over'); });
 soZone.addEventListener('dragleave', () => soZone.classList.remove('drag-over'));
 soZone.addEventListener('drop', e => {
   e.preventDefault(); soZone.classList.remove('drag-over');
-  [...e.dataTransfer.files].forEach(f => { if (f.name.endsWith('.so')) addSoFile(f); });
+  [...e.dataTransfer.files].forEach(f => { if (f.name.endsWith('.so')) addSo(f); });
 });
 
-function addSoFile(f) {
+function addSo(f) {
   if (soFiles.find(x => x.name === f.name)) return;
-  soFiles.push(f);
-  renderSoList();
+  soFiles.push(f); renderSoList();
 }
 
-function removeSo(name) {
-  soFiles = soFiles.filter(f => f.name !== name);
-  renderSoList();
-}
+function removeSo(name) { soFiles = soFiles.filter(f => f.name !== name); renderSoList(); }
 
 function renderSoList() {
-  const list  = document.getElementById('soList');
-  const empty = document.getElementById('emptyMsg');
-  if (soFiles.length === 0) {
-    list.innerHTML = ''; list.appendChild(empty); empty.style.display = ''; return;
-  }
-  empty.style.display = 'none';
+  const list = document.getElementById('soList');
   list.innerHTML = '';
   soFiles.forEach(f => {
-    const libName = f.name.replace(/\.so$/i,'').replace(/^lib/i,'');
-    const div = document.createElement('div');
-    div.className = 'so-item';
-    div.innerHTML = `
-      <div>
-        <div class="so-item-name">lib${libName}.so</div>
-        <div class="so-item-sub">✔ ${f.name} · arm64-v8a</div>
-      </div>
-      <button class="remove-so" onclick="removeSo('${f.name}')" title="Remove">✕</button>
-    `;
-    list.appendChild(div);
+    const el = document.createElement('div');
+    el.className = 'so-item';
+    el.innerHTML = `<div class="so-dot"></div><div class="so-name">${f.name}</div><div class="so-arch">arm64-v8a</div><button class="so-rm" onclick="removeSo('${f.name}')" title="Remove">✕</button>`;
+    list.appendChild(el);
   });
 }
 
-// ─── Liquid ripple ────────────────────────────────────────────────────────────
-document.addEventListener('click', e => {
-  const btn = e.target.closest('.btn');
-  if (!btn || btn.disabled) return;
-  const r    = document.createElement('span');
-  r.className = 'ripple';
-  const rect = btn.getBoundingClientRect();
-  const size = Math.max(rect.width, rect.height);
-  r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
-  btn.appendChild(r);
-  r.addEventListener('animationend', () => r.remove());
-});
-
-// ─── Log helpers ──────────────────────────────────────────────────────────────
-const logBox      = document.getElementById('logBox');
-const progressWrap = document.getElementById('progressWrap');
-const progressBar  = document.getElementById('progressBar');
-
-let logOffset = 0;
+const logbox = document.getElementById('logbox');
+const pbarTrack = document.getElementById('pbarTrack');
+const pbarFill  = document.getElementById('pbarFill');
 
 function logClear() {
-  logBox.innerHTML = ''; logOffset = 0;
-  logBox.classList.add('visible');
-  progressWrap.classList.add('visible');
-  progressBar.style.width = '0%';
-  document.getElementById('dlWrap').classList.remove('visible');
+  logbox.innerHTML=''; logOffset=0;
+  logbox.classList.add('show'); pbarTrack.classList.add('show');
+  pbarFill.style.width='0%';
+  document.getElementById('dlBtn').classList.remove('show');
 }
 
 function appendLogs(lines) {
-  lines.forEach(({msg, level}) => {
+  lines.forEach(({msg,level}) => {
     const p = document.createElement('p');
-    p.className = 'log-line ' + (level||'');
-    p.textContent = msg;
-    logBox.appendChild(p);
+    p.className = level||''; p.textContent = msg;
+    logbox.appendChild(p);
   });
-  logBox.scrollTop = logBox.scrollHeight;
+  logbox.scrollTop = logbox.scrollHeight;
 }
 
-const PROGRESS_STEPS = {
-  'Decompiling': 15,
-  'Decompiled':  30,
-  'Locating':    35,
-  'Found:':      45,
-  'Patching':    55,
-  'Smali patched': 65,
-  'lib':         75,
-  'Recompiling': 80,
-  'Recompiled':  88,
-  'Signing':     92,
-  'Signed':      97,
-  'Done':        100,
-};
+const STEPS = { 'Decompiling':15,'Decompiled':30,'Locating':35,'Found:':45,'Patching':55,'Smali patched':65,'lib':75,'Recompiling':80,'Recompiled':88,'Signing':92,'Signed':97,'Done':100 };
 
 function updateProgress(lines) {
-  lines.forEach(({msg}) => {
-    for (const [key, val] of Object.entries(PROGRESS_STEPS)) {
-      if (msg.includes(key)) progressBar.style.width = val + '%';
-    }
-  });
+  lines.forEach(({msg}) => { for (const [k,v] of Object.entries(STEPS)) { if (msg.includes(k)) pbarFill.style.width=v+'%'; } });
 }
 
-// ─── Build ────────────────────────────────────────────────────────────────────
 async function startBuild() {
-  if (!apkFile)         { alert('Please upload an APK first.'); return; }
-  if (soFiles.length===0) { alert('Please upload at least one .so file.'); return; }
-
+  if (!apkFile) { alert('Please upload an APK first.'); return; }
+  if (soFiles.length===0) { alert('Please add at least one .so file.'); return; }
   const btn = document.getElementById('buildBtn');
-  btn.disabled = true;
-  logClear();
-
+  btn.disabled=true; btn.textContent='Building…'; logClear();
   const fd = new FormData();
-  fd.append('apk', apkFile);
-  soFiles.forEach(f => fd.append('libs', f));
-
+  fd.append('apk', apkFile); soFiles.forEach(f => fd.append('libs', f));
   let jobId;
   try {
-    const res  = await fetch('/inject', { method: 'POST', body: fd });
+    const res = await fetch('/inject', {method:'POST',body:fd});
     const data = await res.json();
-    if (data.error) { throw new Error(data.error); }
+    if (data.error) throw new Error(data.error);
     jobId = data.job_id;
-  } catch (err) {
-    appendLogs([{msg: '✗ Upload failed: ' + err.message, level: 'err'}]);
-    btn.disabled = false;
-    return;
+  } catch(err) {
+    appendLogs([{msg:'Upload failed: '+err.message,level:'err'}]);
+    btn.disabled=false; btn.textContent='Inject & Build'; return;
   }
-
-  currentJob = jobId;
   pollInterval = setInterval(() => pollJob(jobId, btn), 1200);
 }
 
 async function pollJob(jobId, btn) {
   try {
-    const res  = await fetch('/status/' + jobId);
+    const res = await fetch('/status/'+jobId);
     const data = await res.json();
-
-    // Show new log lines
     const newLines = data.log.slice(logOffset);
-    if (newLines.length) {
-      appendLogs(newLines);
-      updateProgress(newLines);
-      logOffset = data.log.length;
+    if (newLines.length) { appendLogs(newLines); updateProgress(newLines); logOffset=data.log.length; }
+    if (data.status==='done') {
+      clearInterval(pollInterval); btn.disabled=false; btn.textContent='Inject & Build'; pbarFill.style.width='100%';
+      const dlBtn = document.getElementById('dlBtn');
+      dlBtn.onclick = () => window.location.href='/download/'+jobId;
+      dlBtn.classList.add('show');
+    } else if (data.status==='failed') {
+      clearInterval(pollInterval); btn.disabled=false; btn.textContent='Inject & Build';
     }
-
-    if (data.status === 'done') {
-      clearInterval(pollInterval);
-      btn.disabled = false;
-      progressBar.style.width = '100%';
-      const dlWrap = document.getElementById('dlWrap');
-      const dlBtn  = document.getElementById('dlBtn');
-      dlBtn.onclick = () => window.location.href = '/download/' + jobId;
-      dlWrap.classList.add('visible');
-    } else if (data.status === 'failed') {
-      clearInterval(pollInterval);
-      btn.disabled = false;
-    }
-  } catch (e) {
-    // network blip — keep polling
-  }
+  } catch(e) {}
 }
 </script>
 </body>
