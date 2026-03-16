@@ -1,9 +1,5 @@
 services:
   - type: web
     name: apk-so-injector
-    runtime: python
-    buildCommand: bash build.sh
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --timeout 600 --workers 1
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.12.0
+    runtime: docker
+    dockerfilePath: ./Dockerfile
